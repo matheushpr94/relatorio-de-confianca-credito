@@ -1,0 +1,48 @@
+
+====================================================================================
+A MARGEM CERTA E' ATE' O LIMIAR OPERACIONAL (0.0660), NAO ATE' 0,5
+====================================================================================
+   Pela distancia ao 0,5, os 10% 'mais incertos' seriam outras pessoas:
+   as duas listas tem 0.0% das pessoas em comum.
+   probabilidade mediana dos 10% mais incertos pela margem CERTA:  0.0651
+   pela margem ERRADA (distancia ao 0,5):                          0.2180
+   positivos reais capturados na fila da margem certa:  25 de 273
+   na fila da margem errada:                            84 de 273
+
+====================================================================================
+CURVA RISCO-COBERTURA — o que se ganha ao deixar de responder
+====================================================================================
+    cobertura  respondidos  revisao humana  precisao   recall   calotes na fila
+        100%        3,600               0     0.136    0.674           0 de 273
+         98%        3,528              72     0.139    0.679           5 de 273
+         95%        3,420             180     0.141    0.685          13 de 273
+         90%        3,240             360     0.143    0.685          25 de 273
+         80%        2,880             720     0.154    0.701          42 de 273
+
+====================================================================================
+O QUE ISSO CUSTA EM GENTE
+====================================================================================
+   O arquivo nao tem data, entao nao existe 'casos por dia' honesto aqui: a
+   conta depende do volume de solicitacoes, que e' informacao de operacao.
+   Entao a conta vai por mil solicitacoes, e quem opera multiplica.
+
+   cobertura 98%  ->    20 analises humanas por 1.000 solicitacoes
+   cobertura 95%  ->    50 analises humanas por 1.000 solicitacoes
+   cobertura 90%  ->   100 analises humanas por 1.000 solicitacoes
+   cobertura 80%  ->   200 analises humanas por 1.000 solicitacoes
+
+   Com 18.000 solicitacoes, 90% de cobertura seriam 1.800 analises. Se isso for
+   um mes, sao ~60 por dia util; se for um dia, e' outra conversa inteira. A
+   pergunta 'em que periodo?' vira lacuna do relatorio.
+
+====================================================================================
+AS QUATRO PERGUNTAS QUE UMA POLITICA DE ABSTENCAO PRECISA RESPONDER
+====================================================================================
+   1. Quem revisa?                           NAO RESPONDIDA — sem pessoa designada, a politica fica no papel
+   2. Quantos por dia?                       depende do volume; a tabela acima da' a conta por mil
+   3. Em quanto tempo?                       NAO RESPONDIDA — analise que demora mais que a concessao nao serve
+   4. O revisor acerta mais que o modelo?    NAO RESPONDIDA — e se nao acertar, encaminhar PIORA o resultado
+
+   Tres das quatro sem resposta. Abster 10% sem ninguem para revisar deixa o
+   sistema pior do que responder tudo — por isso a recomendacao do relatorio
+   nao pode ser 'com revisao humana' antes de alguem assumir a fila.

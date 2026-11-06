@@ -1,0 +1,20 @@
+DADO SINTETICO — gerado por src/gerar_dados.py, nao e' dado real
+semente 5 | 18,000 linhas x 15 colunas
+sha256 a7e9b03d5167a3c7d2f9ec6ccae949f17f46c6c5db7a2b3e98a60ee194038bdf
+prevalencia geral: 7.60%
+
+Efeito PLANTADO na regiao Norte: mesma taxa de calote, sinal observavel
+multiplicado por 0.15 e fator latente com peso 1.6 (outras regioes: 0.4).
+
+              linhas  positivos  taxa
+regiao                               
+Centro-Oeste    1448        126 8.70%
+Nordeste        4636        345 7.44%
+Norte           1815        134 7.38%
+Sudeste         7595        562 7.40%
+Sul             2506        201 8.02%
+
+score_bureau medio por desfecho (o sinal da regua de uma coluna):
+inadimplente
+0    640.3
+1    573.4

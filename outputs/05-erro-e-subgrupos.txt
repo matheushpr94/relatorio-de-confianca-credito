@@ -1,0 +1,107 @@
+
+====================================================================================
+A MATRIZ, NO LIMIAR OPERACIONAL t = 0.0660  (1 FN = 10 FPs)
+====================================================================================
+
+   limiar padrao 0,5
+                               previsto INADIMPLENTE    previsto PAGADOR
+      real INADIMPLENTE                      VP = 10            FN = 263
+      real PAGADOR                            FP = 2           VN = 3325
+      recall 0.037 | precisao 0.833 | negados 12 de 3,600
+
+   limiar operacional 0.0660
+                               previsto INADIMPLENTE    previsto PAGADOR
+      real INADIMPLENTE                     VP = 184             FN = 89
+      real PAGADOR                         FP = 1168           VN = 2159
+      recall 0.674 | precisao 0.136 | negados 1,352 de 3,600
+
+====================================================================================
+AS METRICAS, CADA UMA COM O SEU PISO
+====================================================================================
+   metrica                                           valor     piso   quem alcanca o piso
+   Precisao (dos negados, quantos dariam calote)     0.136    0.076   quem nega ao acaso acerta a prevalencia
+   Recall (dos caloteiros, quantos retidos)          0.674    0.000   o modelo burro nao acha nenhum
+   Especificidade (dos bons, quantos em paz)         0.649    1.000   o modelo burro deixa TODOS em paz
+   Balanced accuracy                                 0.661    0.500   acaso
+   MCC                                               0.177    0.000   acaso
+   AUPRC                                             0.239    0.076   = prevalencia
+   AUC-ROC                                           0.722    0.500   acaso
+
+   A acurácia nao esta' nesta tabela de proposito: no limiar operacional ela
+   cai para 0.6508, abaixo do piso de 0.9242 — e isso e'
+   esperado, nao defeito: a troca e' de acuracia por recall de caso raro.
+
+====================================================================================
+FATIAMENTO — a media esconde falha localizada
+====================================================================================
+
+por regiao
+   grupo                         n   pos   recall    IC 95% do recall  precisao  negados   alerta
+   Centro-Oeste                275    24    0.833     [0.641 , 0.933]     0.190      105         
+   Nordeste                    904    79    0.684     [0.575 , 0.776]     0.166      326         
+   Norte                       382    32    0.312     [0.180 , 0.486]     0.077      130     PIOR
+   Sudeste                   1,541   105    0.762     [0.672 , 0.833]     0.139      574         
+   Sul                         498    33    0.606     [0.437 , 0.753]     0.092      217  incerto
+   (geral)                   3,600   273    0.674     [0.616 , 0.727]     0.136    1,352
+
+por canal
+   grupo                         n   pos   recall    IC 95% do recall  precisao  negados   alerta
+   Agência                   1,104    88    0.773     [0.675 , 0.848]     0.148      459         
+   App                       1,932   141    0.610     [0.528 , 0.687]     0.124      691         
+   Correspondente              564    44    0.682     [0.534 , 0.800]     0.149      202         
+   (geral)                   3,600   273    0.674     [0.616 , 0.727]     0.136    1,352
+
+por faixa de idade
+   grupo                         n   pos   recall    IC 95% do recall  precisao  negados   alerta
+   18-25                       492    37    0.595     [0.435 , 0.737]     0.094      233  incerto
+   26-35                       977    70    0.743     [0.630 , 0.831]     0.133      390         
+   36-50                     1,648   138    0.688     [0.607 , 0.760]     0.160      595         
+   51+                         483    28    0.536     [0.358 , 0.705]     0.112      134  incerto
+   (geral)                   3,600   273    0.674     [0.616 , 0.727]     0.136    1,352
+
+por faixa de valor solicitado
+   grupo                         n   pos   recall    IC 95% do recall  precisao  negados   alerta
+   valor Q1                    900    60    0.683     [0.558 , 0.787]     0.114      359         
+   valor Q2                    900    76    0.632     [0.519 , 0.731]     0.140      344         
+   valor Q3                    900    64    0.797     [0.683 , 0.877]     0.155      330         
+   valor Q4                    900    73    0.603     [0.488 , 0.707]     0.138      319         
+   (geral)                   3,600   273    0.674     [0.616 , 0.727]     0.136    1,352
+
+por garantia
+   grupo                         n   pos   recall    IC 95% do recall  precisao  negados   alerta
+   com imovel                1,095    78    0.654     [0.543 , 0.750]     0.170      300         
+   sem imovel                2,505   195    0.682     [0.614 , 0.743]     0.126    1,052         
+   (geral)                   3,600   273    0.674     [0.616 , 0.727]     0.136    1,352
+
+====================================================================================
+O ACHADO DO PIOR SUBGRUPO SOBREVIVE A' ESCOLHA DO LIMIAR?
+====================================================================================
+Um achado que so' existe num limiar e' artefato da escolha, nao propriedade do
+modelo. Entao: o mesmo teste, repetido em cada cenario de custo da faixa.
+
+   pior subgrupo no cenario de referencia: Norte
+
+     razao   limiar   recall geral    recall Norte            IC 95%   diferenca
+        1x    0.372          0.081           0.031     [0.01 , 0.16]   inconclusiva
+        2x    0.302          0.117           0.031     [0.01 , 0.16]   inconclusiva
+        5x    0.193          0.256           0.031     [0.01 , 0.16]   REAL
+       10x    0.066          0.674           0.312     [0.18 , 0.49]   REAL
+       20x    0.056          0.714           0.344     [0.20 , 0.52]   REAL
+       50x    0.025          0.941           0.719     [0.55 , 0.84]   REAL
+      100x    0.015          0.982           0.906     [0.76 , 0.97]   REAL
+      200x    0.015          0.982           0.906     [0.76 , 0.97]   REAL
+
+   Real em 6 dos 8 cenarios.
+   Inconclusiva em: 1:1 (recall geral 0.08), 2:1 (recall geral 0.12).
+   Leia o recall geral ao lado: onde ele e' muito baixo, o modelo nao acha
+   quase ninguem em lugar nenhum, e nao sobra diferenca para medir.
+
+====================================================================================
+COMO LER ESTE FATIAMENTO SEM EXAGERAR
+====================================================================================
+   Grupo com menos de 30 positivos nao sustenta recall: um unico caso muda a
+   terceira casa. Por isso a coluna de alerta separa 'incerto' (intervalo largo)
+   de 'PIOR' (intervalo inteiro abaixo do recall geral).
+   E recall baixo num grupo nao prova discriminacao: prova que o modelo tem
+   menos evidencia ali. A pergunta seguinte e' se o grupo recebe decisao pior
+   por isso — e essa e' pergunta de politica, nao de metrica.

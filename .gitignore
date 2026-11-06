@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+# O dado sintetico e' regenerado pelo pipeline (deterministico); nao precisa ir pro git.
+data/*.csv

@@ -1,0 +1,10 @@
+   gravado: docs/figuras/custo_limiar.png
+      t* = 0.0660 | custo em t* 2,058 | custo em 0,5 2,632 (1.28x)
+   gravado: docs/figuras/recall_por_regiao.png
+      Norte          recall 0.312 [0.180 ; 0.486]  positivos 32
+      Sul            recall 0.606 [0.437 ; 0.753]  positivos 33
+      Nordeste       recall 0.684 [0.575 ; 0.776]  positivos 79
+      Sudeste        recall 0.762 [0.672 ; 0.833]  positivos 105
+      Centro-Oeste   recall 0.833 [0.641 ; 0.933]  positivos 24
+   gravado: docs/figuras/calibracao.png
+      ECE 0.0089 | Brier 0.06476 | maior gap entre previsto e observado 0.017

@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relatório de Confiança: modelo de crédito (dado sintético)</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+<style>
+  :root {
+    --papel: #FFFFFF; --papel-2: #F5F8F5; --tinta: #14261F; --tinta-suave: #47594F;
+    --linha: #CBD8CC; --fala: #1F5D45; --ambar: #8A6008; --tijolo: #9E3925;
+    --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --corpo: "Literata", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel: #0F1613; --papel-2: #17211C; --tinta: #E4EBE4; --tinta-suave: #9DB0A4;
+      --linha: #2B3830; --fala: #6FC69E; --ambar: #E2AE4C; --tijolo: #E68C74;
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel: #0F1613; --papel-2: #17211C; --tinta: #E4EBE4; --tinta-suave: #9DB0A4;
+    --linha: #2B3830; --fala: #6FC69E; --ambar: #E2AE4C; --tijolo: #E68C74;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--papel); color: var(--tinta); font-family: var(--corpo);
+         font-size: 15px; line-height: 1.55; margin: 0 auto; padding: 48px 28px 72px;
+         max-width: 840px; }
+  h1 { font-family: var(--display); font-size: 38px; font-weight: 700; letter-spacing: -.02em;
+       line-height: 1.05; margin: 0 0 6px; text-wrap: balance; }
+  h1 + p { color: var(--tinta-suave); }
+  h2 { font-family: var(--display); font-size: 21px; font-weight: 700; margin: 34px 0 12px;
+       padding-top: 14px; border-top: 2px solid var(--tinta); letter-spacing: -.01em; }
+  h3 { font-family: var(--display); font-size: 16px; font-weight: 700; margin: 22px 0 9px; }
+  p, li { margin: 0 0 11px; }
+  ul, ol { padding-left: 22px; margin: 0 0 12px; }
+  strong { font-weight: 600; }
+  hr { border: 0; height: 0; margin: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 18px; font-size: 13.5px;
+          font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;
+       text-transform: uppercase; color: var(--tinta-suave); font-weight: 600;
+       border-bottom: 1.5px solid var(--tinta); padding: 7px 10px 7px 0; }
+  td { padding: 7px 10px 7px 0; border-bottom: 1px solid var(--linha); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  blockquote { margin: 14px 0; padding: 13px 18px; background: var(--papel-2);
+               border-left: 3px solid var(--ambar); border-radius: 0 3px 3px 0;
+               font-size: 14.5px; }
+  blockquote p:last-child { margin-bottom: 0; }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--papel-2);
+         padding: 1px 4px; border-radius: 2px; }
+  @media print {
+    @page { size: A4; margin: 16mm 14mm; }
+    body { font-size: 9.5pt; line-height: 1.4; padding: 0; max-width: none;
+           background: #fff; color: #000; }
+    h1 { font-size: 22pt; } h2 { font-size: 13pt; margin-top: 20px; padding-top: 9px; }
+    h3 { font-size: 11pt; }
+    h2, h3 { break-after: avoid; }
+    table, blockquote { break-inside: avoid; }
+    table { font-size: 8.5pt; } blockquote { font-size: 9pt; background: #f4f6f4; }
+    code { background: transparent; }
+  }
+</style>
+<h1>Relatório de Confiança</h1>
+<p><strong>Modelo:</strong> regressão logística sobre 13 variáveis de solicitação de crédito<br />
+<strong>Autor:</strong> Matheus Rosa. Workshop da Residência em IA, feito em dupla; este repositório
+é a minha reconstrução com dado sintético.</p>
+<blockquote>
+<p><strong>Dado sintético.</strong> Todos os números deste relatório vêm de 18.000
+solicitações geradas por <code>src/gerar_dados.py</code> (semente fixa). O efeito na região
+Norte foi <strong>plantado</strong> no gerador: lá o risco depende mais de um fator que não está
+no arquivo. O relatório mostra o método encontrando esse efeito; ele não descreve
+nenhum mercado real.</p>
+</blockquote>
+<p><strong>Decisão que este modelo apoia:</strong> triagem de solicitações de crédito.</p>
+<blockquote>
+<p><strong>Premissa declarada:</strong> este relatório trata a saída do
+modelo como <strong>negativa de crédito</strong>, que é a leitura mais severa. Se na prática ele
+só encaminha para análise humana, o custo de um falso positivo cai muito — de
+"a pessoa não recebe o crédito" para "a pessoa espera mais" — e a razão de custo da
+seção 4 muda junto. Confirmar antes de usar qualquer linha daquela tabela.</p>
+</blockquote>
+<p><strong>Quem é afetado por um erro:</strong> de um lado a pessoa que pede crédito; do outro o
+banco que empresta. Os dois lados aparecem na seção 2, com nome e consequência.</p>
+<hr />
+<h2>1 · Dados de avaliação</h2>
+<ul>
+<li>Tamanho do conjunto de teste: <strong>3.600</strong> solicitações</li>
+<li>Prevalência da classe positiva: <strong>7,58%</strong> (273 inadimplentes)</li>
+<li>Conjunto separado para calibração? <strong>☑ sim</strong> ☐ não · tamanho: <strong>3.600</strong></li>
+<li>Treino: 10.800. Divisão 60/20/20 estratificada, semente 42.</li>
+</ul>
+<p><strong>O teste representa a distribuição de produção?</strong> ☐ sim <strong>☑ não</strong> ☐ não sabemos</p>
+<p><strong>O que faria essa suposição falhar:</strong></p>
+<ol>
+<li><strong>A amostra é a população aprovada.</strong> Todas as linhas têm desfecho de
+   inadimplência, e desfecho só existe para crédito concedido. Quem foi negado não
+   está no arquivo, e em produção o modelo pontua essas pessoas também
+   (<em>reject inference</em>).</li>
+<li><strong>Não há coluna de data.</strong> Sem ela não há validação temporal, nem medição de
+   deriva, nem separação por safra. O sorteio aleatório dos conjuntos é a única
+   opção, e ele é otimista se o mundo muda com o tempo.</li>
+<li><strong>O dado é sintético:</strong> 18.000 linhas geradas com distribuições escritas à
+   mão. Ele serve para demonstrar o método; nenhum número aqui vale como estimativa
+   de um mercado real.</li>
+</ol>
+<hr />
+<h2>2 · Matriz de confusão</h2>
+<p>Limiar operacional usado: <strong>t = 0,0660</strong>, derivado do custo (seção 4).</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Previsto INADIMPLENTE</th>
+<th>Previsto PAGADOR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Real INADIMPLENTE</strong></td>
+<td>VP = 184</td>
+<td>FN = 89</td>
+</tr>
+<tr>
+<td><strong>Real PAGADOR</strong></td>
+<td>FP = 1168</td>
+<td>VN = 2159</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Um falso positivo significa, na prática:</strong> uma pessoa que pagaria o empréstimo
+tem o crédito negado. Ela não faz a compra, a obra ou o capital de giro; o banco
+deixa de ganhar o juro daquele contrato. Aconteceu com <strong>1168 das 3.327</strong> pessoas boas do teste.</p>
+<p><strong>Um falso negativo significa, na prática:</strong> uma pessoa recebe um empréstimo que não
+vai conseguir pagar. O banco perde o principal, e ela entra numa dívida com
+negativação atrás. Aconteceu com <strong>89 dos 273</strong> inadimplentes.</p>
+<hr />
+<h2>3 · Métricas</h2>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+<th>Piso</th>
+<th>Quem alcança o piso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Precisão</td>
+<td>0,136</td>
+<td>0,076</td>
+<td>negar ao acaso</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>0,674</td>
+<td>0,000</td>
+<td>o modelo que nunca acusa ninguém</td>
+</tr>
+<tr>
+<td>Especificidade</td>
+<td>0,649</td>
+<td>1,000</td>
+<td>esse mesmo modelo, que deixa todos em paz</td>
+</tr>
+<tr>
+<td>Balanced accuracy</td>
+<td>0,661</td>
+<td>0,500</td>
+<td>acaso</td>
+</tr>
+<tr>
+<td>MCC</td>
+<td>0,177</td>
+<td>0,000</td>
+<td>acaso</td>
+</tr>
+<tr>
+<td>AUPRC</td>
+<td>0,239</td>
+<td>0,076</td>
+<td>acaso (= a prevalência)</td>
+</tr>
+<tr>
+<td>AUC-ROC</td>
+<td>0,722</td>
+<td>0,500</td>
+<td>acaso</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Métrica primária escolhida: recall</strong>, com precisão como restrição de operação.</p>
+<p><strong>Justificativa, ligada ao custo do erro:</strong> o falso negativo custa o principal do
+empréstimo; o falso positivo custa o juro de um contrato e o incômodo de uma pessoa.
+Enquanto o negócio não assinar a razão exata, a ordem de grandeza já é clara, e ela
+manda priorizar recall. <strong>A acurácia foi deliberadamente deixada de fora desta
+tabela:</strong> no limiar operacional ela cai para 0,6508, <strong>abaixo do piso de 0,9242</strong>
+do modelo que não faz nada. Isso é esperado — a troca é de acurácia por detecção de caso
+raro — e é exatamente por isso que acurácia não serve para decidir aqui.</p>
+<p><strong>O que o modelo ganha de um baseline honesto.</strong> Todos medidos na <strong>calibração</strong>,
+que é onde a escolha foi feita — comparar AUPRC entre conjuntos diferentes não vale:</p>
+<table>
+<thead>
+<tr>
+<th>Comparação</th>
+<th>AUPRC na calibração</th>
+<th>× o piso</th>
+<th>AUPRC no próprio treino</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chutar ao acaso</td>
+<td>0,076</td>
+<td>1,0x</td>
+<td>—</td>
+</tr>
+<tr>
+<td>regra de uma coluna (score do bureau)</td>
+<td>0,205</td>
+<td>2,7x</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>a logística</strong></td>
+<td>0,287</td>
+<td>3,8x</td>
+<td>0,249</td>
+</tr>
+<tr>
+<td>Random Forest</td>
+<td>0,242</td>
+<td>3,2x</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>HistGradientBoosting</td>
+<td>0,242</td>
+<td>3,2x</td>
+<td>0,562</td>
+</tr>
+</tbody>
+</table>
+<p>A última coluna é o teste de memória: quando o modelo acerta muito melhor nas linhas
+que já viu do que nas que não viu, ele decorou em vez de aprender. O Random Forest
+chega a 1,000 no próprio treino e cai para 0,242 fora dele.</p>
+<hr />
+<h2>4 · Custo e limiar</h2>
+<ul>
+<li>Razão de custo adotada (FN : FP): <strong>10:1</strong>, <strong>premissa declarada</strong>: não há área de negócio neste exercício</li>
+<li><strong>De onde vem:</strong> no calote o banco perde o principal, entre
+  60% e 90% dele, porque parte se recupera. No cliente bom barrado, perde a margem
+  daquele contrato, entre 5% e 15%. A razão entre as duas cai entre <strong>4:1 e 18:1</strong>, e
+  10:1 é o meio da faixa. A tabela de sensibilidade abaixo é a resposta para "e se
+  essa conta estiver errada?".</li>
+<li><strong>Quem validaria isso fora de um exercício:</strong> risco de crédito ou a área de negócio —
+  nunca quem treinou o modelo, porque quem treina tem interesse no resultado.</li>
+<li>Limiar ótimo: <strong>0,0660</strong>, escolhido na <strong>calibração</strong> e aplicado ao teste</li>
+<li>No limiar padrão 0,5: recall 0,037, apenas 10 dos 273 inadimplentes retidos</li>
+<li>Custo em t*: <strong>2.058</strong> · Custo em t = 0,5: <strong>2.632</strong> (unidade: 1 falso positivo; <strong>1,28x</strong> mais caro no 0,5)</li>
+</ul>
+<p><strong>O que cada razão de custo produziria.</strong> É esta tabela, e não o número adotado, que
+sustenta a premissa: ela mostra o que muda se alguém discordar de 10:1. Limiar
+escolhido na calibração, resultado medido no teste:</p>
+<table>
+<thead>
+<tr>
+<th>1 FN vale</th>
+<th>limiar</th>
+<th>recall</th>
+<th>precisão</th>
+<th>pessoas negadas</th>
+<th>calotes retidos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5 FPs</td>
+<td>0,1930</td>
+<td>0,256</td>
+<td>0,285</td>
+<td>246 (6,8%)</td>
+<td>70 de 273</td>
+</tr>
+<tr>
+<td>10 FPs</td>
+<td>0,0660</td>
+<td>0,674</td>
+<td>0,136</td>
+<td>1.352 (37,6%)</td>
+<td>184 de 273</td>
+</tr>
+<tr>
+<td>20 FPs</td>
+<td>0,0560</td>
+<td>0,714</td>
+<td>0,122</td>
+<td>1.596 (44,3%)</td>
+<td>195 de 273</td>
+</tr>
+<tr>
+<td>50 FPs</td>
+<td>0,0250</td>
+<td>0,941</td>
+<td>0,093</td>
+<td>2.761 (76,7%)</td>
+<td>257 de 273</td>
+</tr>
+<tr>
+<td>100 FPs</td>
+<td>0,0150</td>
+<td>0,982</td>
+<td>0,083</td>
+<td>3.220 (89,4%)</td>
+<td>268 de 273</td>
+</tr>
+<tr>
+<td>200 FPs</td>
+<td>0,0150</td>
+<td>0,982</td>
+<td>0,083</td>
+<td>3.220 (89,4%)</td>
+<td>268 de 273</td>
+</tr>
+</tbody>
+</table>
+<p>Na última linha o modelo nega quase todo mundo: deixa de ser modelo e vira
+política de não emprestar. O limite superior útil da razão está bem antes disso.</p>
+<hr />
+<h2>5 · Calibração</h2>
+<ul>
+<li>ECE: <strong>0,0089</strong> · Brier: <strong>0,06476</strong> (piso do Brier: 0,0701)</li>
+<li>Diagnóstico: ☐ descalibrado <strong>☑ calibrado</strong>. Em oito faixas de mesma população, a maior diferença
+  entre o previsto e o observado é de 0,017.</li>
+<li>Correção aplicada: <strong>nenhuma, e isso foi decidido por medição.</strong>
+  Platt e isotônica foram testadas e nenhuma melhorou: o ECE foi de 0,0089 para
+  0,0135 e 0,0102, e a isotônica mexeu na AUC em -0,0018.
+  A regressão logística já otimiza log-loss, então chegar calibrada é o esperado.</li>
+<li>Conjunto usado para calibrar: o de calibração (nunca o teste).</li>
+<li><strong>O limiar foi recalculado depois de calibrar?</strong> <strong>☑ sim</strong> ☐ não — para as três
+  versões; a operação resultante é praticamente a mesma.</li>
+</ul>
+<blockquote>
+<p><strong>ECE baixo, sozinho, não é mérito.</strong> O piso do ECE é zero, e quem o alcança é o
+modelo que devolve 7,58% para todo mundo e não detecta ninguém. 
+ECE só significa alguma coisa ao lado de uma medida de ordenação, como a AUPRC.</p>
+</blockquote>
+<hr />
+<h2>6 · Incerteza e abstenção</h2>
+<table>
+<thead>
+<tr>
+<th>Cobertura</th>
+<th>Respondidos</th>
+<th>À revisão humana</th>
+<th>Precisão</th>
+<th>Recall</th>
+<th>Calotes na fila</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100%</td>
+<td>3.600</td>
+<td>0</td>
+<td>0,136</td>
+<td>0,674</td>
+<td>0 de 273</td>
+</tr>
+<tr>
+<td>98%</td>
+<td>3.528</td>
+<td>72</td>
+<td>0,139</td>
+<td>0,679</td>
+<td>5 de 273</td>
+</tr>
+<tr>
+<td>95%</td>
+<td>3.420</td>
+<td>180</td>
+<td>0,141</td>
+<td>0,685</td>
+<td>13 de 273</td>
+</tr>
+<tr>
+<td>90%</td>
+<td>3.240</td>
+<td>360</td>
+<td>0,143</td>
+<td>0,685</td>
+<td>25 de 273</td>
+</tr>
+<tr>
+<td>80%</td>
+<td>2.880</td>
+<td>720</td>
+<td>0,154</td>
+<td>0,701</td>
+<td>42 de 273</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Volume absoluto enviado a revisão:</strong> a 90% de cobertura, <strong>100 análises por mil</strong>
+  solicitações. O arquivo não tem data, então não existe 'casos por dia' honesto —
+  a conta depende do volume de operação, que não foi informado.</li>
+<li>Cobertura escolhida: <strong>100%</strong> — a decisão é <strong>não abster</strong>, e a tabela acima é o porquê.</li>
+<li>Quem revisa: numa operação real, a mesa de análise de crédito · Essa capacidade
+  existe hoje? ☐ sim <strong>☑ não</strong> — nesta atividade não existe fila nem revisor, o que
+  reforça a decisão de não abster em vez de enfraquecê-la.</li>
+<li><strong>Recomendação sobre abster: não vale a pena com os números atuais.</strong> Parar de
+  responder 10% dos casos compra 0,7 ponto de
+  precisão e 1,1 de recall, ao custo de 360
+  análises humanas no teste. O ganho não paga a fila.</li>
+</ul>
+<blockquote>
+<p>A confiança foi medida como distância ao <strong>limiar operacional</strong>, não ao 0,5. A
+diferença não é técnica, é operacional: as duas listas de '10% mais incertos' têm
+<strong>0 pessoa(s) em comum</strong> de 360. Usar o 0,5 mandaria para revisão as pessoas
+de maior risco, e não as que estão em cima do muro.</p>
+</blockquote>
+<hr />
+<h2>7 · Desempenho por subgrupo</h2>
+<table>
+<thead>
+<tr>
+<th>Subgrupo</th>
+<th>n</th>
+<th>Positivos</th>
+<th>Recall</th>
+<th>IC 95%</th>
+<th>Precisão</th>
+<th>Alerta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Centro-Oeste</td>
+<td>275</td>
+<td>24</td>
+<td>0,833</td>
+<td>[0,641 , 0,933]</td>
+<td>0,190</td>
+<td></td>
+</tr>
+<tr>
+<td>Nordeste</td>
+<td>904</td>
+<td>79</td>
+<td>0,684</td>
+<td>[0,575 , 0,776]</td>
+<td>0,166</td>
+<td></td>
+</tr>
+<tr>
+<td>Norte</td>
+<td>382</td>
+<td>32</td>
+<td>0,312</td>
+<td>[0,180 , 0,486]</td>
+<td>0,077</td>
+<td><strong>PIOR</strong></td>
+</tr>
+<tr>
+<td>Sudeste</td>
+<td>1.541</td>
+<td>105</td>
+<td>0,762</td>
+<td>[0,672 , 0,833]</td>
+<td>0,139</td>
+<td></td>
+</tr>
+<tr>
+<td>Sul</td>
+<td>498</td>
+<td>33</td>
+<td>0,606</td>
+<td>[0,437 , 0,753]</td>
+<td>0,092</td>
+<td>incerto</td>
+</tr>
+<tr>
+<td><strong>(geral)</strong></td>
+<td>3.600</td>
+<td>273</td>
+<td>0,674</td>
+<td>[0,616 , 0,727]</td>
+<td>0,136</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisão sobre o pior subgrupo.</strong> O Norte tem recall <strong>0,312</strong> contra 0,674 no
+agregado, e o intervalo de confiança do grupo <strong>não alcança</strong> o valor geral — a
+diferença não se explica por tamanho de amostra. Na prática, o mesmo modelo é dois
+produtos diferentes: no Sudeste ele retém 76% dos
+calotes, no Norte 31%.
+Note que a <strong>taxa</strong> de calote no Norte (8,4% no teste) é parecida com a
+geral: o problema não é haver mais calote lá, é o modelo ter menos evidência para
+separar quem paga de quem não paga. No dado sintético isso foi plantado de propósito;
+num dado real, a pergunta seguinte seria <em>que informação falta para essa região?</em>
+Isso é risco técnico e é risco jurídico. Enquanto não houver explicação, o Norte não
+deveria operar com decisão automática.</p>
+<h3>Os 10 recortes, e os dois jeitos de um subgrupo ser prejudicado</h3>
+<p>Nomear um subgrupo por intuição é onde mora o viés de quem escolhe. Aqui foram medidos <strong>todos</strong>
+os recortes que o arquivo permite, em duas perguntas que não são a mesma:</p>
+<ul>
+<li><strong>protege menos</strong> — o recall do grupo fica abaixo do geral. Quem paga é a pessoa do
+  grupo cujo calote passou, e o banco.</li>
+<li><strong>barra mais</strong> — a taxa de negação do grupo fica acima da geral. Quem paga é a
+  pessoa que teria pagado e levou não.</li>
+</ul>
+<p>Só entra na lista quem tem o intervalo de 95% inteiro fora do valor geral:</p>
+<table>
+<thead>
+<tr>
+<th>Recorte</th>
+<th>Grupo</th>
+<th>n</th>
+<th>Recall</th>
+<th>Negados</th>
+<th>O quê</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>regiao</td>
+<td>Norte</td>
+<td>382</td>
+<td>0,312</td>
+<td>34,0%</td>
+<td>protege menos</td>
+</tr>
+<tr>
+<td>regiao</td>
+<td>Sul</td>
+<td>498</td>
+<td>0,606</td>
+<td>43,6%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>canal</td>
+<td>Agência</td>
+<td>1.104</td>
+<td>0,773</td>
+<td>41,6%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>faixa de idade</td>
+<td>18-25</td>
+<td>492</td>
+<td>0,595</td>
+<td>47,4%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>faixa de renda</td>
+<td>renda Q1</td>
+<td>900</td>
+<td>0,772</td>
+<td>44,2%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>faixa de renda</td>
+<td>renda Q4</td>
+<td>900</td>
+<td>0,542</td>
+<td>30,6%</td>
+<td>protege menos</td>
+</tr>
+<tr>
+<td>faixa de score</td>
+<td>score Q1</td>
+<td>904</td>
+<td>0,924</td>
+<td>85,8%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>faixa de score</td>
+<td>score Q2</td>
+<td>899</td>
+<td>0,657</td>
+<td>45,1%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>faixa de score</td>
+<td>score Q3</td>
+<td>908</td>
+<td>0,319</td>
+<td>14,8%</td>
+<td>protege menos</td>
+</tr>
+<tr>
+<td>faixa de score</td>
+<td>score Q4</td>
+<td>889</td>
+<td>0,143</td>
+<td>4,2%</td>
+<td>protege menos</td>
+</tr>
+<tr>
+<td>garantia</td>
+<td>sem imovel</td>
+<td>2.505</td>
+<td>0,682</td>
+<td>42,0%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>prazo</td>
+<td>60x</td>
+<td>347</td>
+<td>0,650</td>
+<td>47,0%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>atrasos em 12m</td>
+<td>0 atraso(s)</td>
+<td>2.559</td>
+<td>0,564</td>
+<td>29,2%</td>
+<td>protege menos</td>
+</tr>
+<tr>
+<td>atrasos em 12m</td>
+<td>1 atraso(s)</td>
+<td>869</td>
+<td>0,778</td>
+<td>53,3%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td>atrasos em 12m</td>
+<td>2 atraso(s)</td>
+<td>154</td>
+<td>1,000</td>
+<td>79,9%</td>
+<td><strong>barra mais</strong></td>
+</tr>
+<tr>
+<td><strong>(geral)</strong></td>
+<td>—</td>
+<td>3.600</td>
+<td>0,674</td>
+<td>37,6%</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Como ler a tabela.</strong></p>
+<ol>
+<li><strong>Barrar mais nem sempre é injusto.</strong> Score baixo, atraso recente e prazo longo
+   são barrados mais porque têm mais risco de fato; isso é o modelo funcionando. O caso
+   que pede atenção é o grupo <strong>protegido menos sem ter risco menor</strong>, e o candidato
+   nítido aqui é o Norte.</li>
+<li><strong>Nos quartis de score alto, o recall despenca.</strong> O modelo pontua muito pelo score,
+   então o inadimplente com bom score passa. É o mesmo que o ganho modesto sobre a
+   régua de uma coluna diz, por outro caminho: <strong>o modelo enxerga pouco risco que o
+   bureau já não enxergue.</strong></li>
+<li><strong>Recortes sem nenhuma diferença sustentada:</strong> faixa de valor, relacao com o banco. Eles
+   aparecem para mostrar que a lista acima não é a fatia escolhida por dar manchete.</li>
+</ol>
+<hr />
+<h2>8 · Limitações e lacunas</h2>
+<table>
+<thead>
+<tr>
+<th>Lacuna</th>
+<th>Risco que ela representa</th>
+<th>Responsável</th>
+<th>Prazo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A razão de custo 10:1 é premissa declarada, derivada e não medida</td>
+<td>se a razão real for outra, o limiar muda; a tabela da seção 4 mostra quanto</td>
+<td>risco de crédito, num banco</td>
+<td>antes do piloto</td>
+</tr>
+<tr>
+<td>A amostra é a população aprovada (<em>reject inference</em>)</td>
+<td>o modelo nunca viu quem foi negado, e vai pontuar essas pessoas</td>
+<td>quem entregou o dado</td>
+<td>antes do piloto</td>
+</tr>
+<tr>
+<td>Não há coluna de data</td>
+<td>sem validação temporal, sem deriva, sem safra</td>
+<td>quem entregou o dado</td>
+<td>antes do piloto</td>
+</tr>
+<tr>
+<td>Recall do Norte é 46% do geral</td>
+<td>mesmo modelo, dois produtos; risco jurídico</td>
+<td>modelagem + jurídico</td>
+<td>antes de ligar no Norte</td>
+</tr>
+<tr>
+<td>Ninguém designado para revisar abstenções</td>
+<td>a política de abstenção fica no papel</td>
+<td>operação</td>
+<td>antes de ligar a abstenção</td>
+</tr>
+<tr>
+<td>O dado é sintético</td>
+<td>os números demonstram o método, não estimam nada real</td>
+<td>modelagem</td>
+<td>antes de qualquer uso</td>
+</tr>
+<tr>
+<td>O ganho sobre olhar só o score do bureau é de 0,082 de AUPRC</td>
+<td>talvez não valha manter um modelo em produção</td>
+<td>modelagem</td>
+<td>antes do piloto</td>
+</tr>
+<tr>
+<td>A calibração serviu a três decisões (escolher modelo, calibrar, escolher limiar)</td>
+<td>o limiar pode estar levemente sobreajustado</td>
+<td>modelagem</td>
+<td>próxima iteração</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Um relatório sem nenhuma lacuna é sinal de que ninguém olhou com atenção suficiente.</p>
+</blockquote>
+<hr />
+<h2>9 · Recomendação</h2>
+<p>☐ Pronto para produção  ·  ☐ Produção com revisão humana  ·  <strong>☑ Piloto restrito</strong>  ·  ☐ Não recomendado</p>
+<p><strong>PILOTO RESTRITO</strong>: nem produção, nem arquivo morto.</p>
+<p>Em duas frases: o modelo ordena risco acima do acaso, chega calibrado e opera num
+limiar derivado do custo — mas no Norte ele retém 31% dos calotes contra 67% no agregado, e a
+amostra só contém quem já teve crédito aprovado. Ligar em produção hoje seria
+automatizar decisão de crédito num grupo onde o modelo comprovadamente funciona pior,
+com uma base que não representa quem vai ser pontuado.</p>
+<p><strong>O que destrava a aprovação, em ordem:</strong> (1) explicação ou correção do
+Norte; (2) confirmação de como o dado foi amostrado, e do que acontece com quem hoje
+é negado; (3) alguém com mandato de negócio revisando a razão de custo adotada;
+(4) se a abstenção for ligada um dia, uma pessoa designada para a fila.</p>
+<p><strong>O que não trava a decisão:</strong> a razão de custo. Ela é premissa declarada, com a
+conta que a produziu e a sensibilidade ao lado. E a recomendação não depende dela:
+o achado do Norte foi testado em todos os 8 cenários da tabela
+da seção 4, e a diferença se sustenta em <strong>6</strong> deles, de 5:1 a
+200:1. Ela só fica inconclusiva em 1:1, 2:1, onde o
+modelo quase não encontra inadimplente em lugar nenhum e não sobra diferença para medir.</p>
+<hr />
+<h2>Apêndice · O que eu faria diferente</h2>
+<ul>
+<li><strong>Separar mais um pedaço do dado.</strong> O conjunto de calibração serviu a três decisões
+  (escolher o modelo, calibrar e escolher o limiar). Um quarto conjunto resolveria.</li>
+<li><strong>Escrever a lista de recortes antes de medir.</strong> Medir todos os recortes reduz o viés
+  de escolher o que dá manchete; fixar a lista antes elimina.</li>
+<li><strong>Perguntar cedo o que o alvo significa.</strong> "Inadimplente" em quantos dias de
+  atraso? Isso muda o que o modelo aprende, e o arquivo não diz.</li>
+<li><strong>Levar as perguntas de negócio para fora antes.</strong> Razão de custo, fila de revisão e
+  amostragem travaram mais o trabalho do que qualquer linha de código.</li>
+</ul>
+<h2>Figuras</h2>
+<figure><img src="figuras/custo_limiar.png" alt="Custo de operar em cada limiar (cenário 10:1). O limiar é escolhido na calibração; a curva é medida no teste." style="max-width:100%"><figcaption>Custo de operar em cada limiar (cenário 10:1). O limiar é escolhido na calibração; a curva é medida no teste.</figcaption></figure>
+<figure><img src="figuras/recall_por_regiao.png" alt="Recall por região, com intervalo de 95% (Wilson). O efeito no Norte foi plantado no gerador sintético." style="max-width:100%"><figcaption>Recall por região, com intervalo de 95% (Wilson). O efeito no Norte foi plantado no gerador sintético.</figcaption></figure>
+<figure><img src="figuras/calibracao.png" alt="Diagrama de confiabilidade no teste: probabilidade prevista contra taxa observada, em oito faixas de mesma população." style="max-width:100%"><figcaption>Diagrama de confiabilidade no teste: probabilidade prevista contra taxa observada, em oito faixas de mesma população.</figcaption></figure>

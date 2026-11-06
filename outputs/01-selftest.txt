@@ -1,0 +1,40 @@
+=== 1. defeito e 'fora do dominio documentado' sao coisas DIFERENTES ===
+    o filtro tira falha comprovada, nao tudo que a documentacao proibe
+  [ok ] nenhum defeito sobra apos a remocao                  esperado 0              obtido 0
+  [ok ] nenhuma linha fora do dominio                        esperado 0              obtido 0
+  [ok ] nenhuma linha incoerente                             esperado 0              obtido 0
+
+=== 1b. a incoerencia entre colunas e' pega pelo schema ===
+  [ok ] 50 anos de banco aos <30 anos de idade               esperado 1              obtido 1
+  [ok ] e incoerentes() aponta a mesma linha                 esperado [12]           obtido [12]
+
+=== 2. valor fora do dominio e' pego, coluna por coluna ===
+    a amostra de 500 ja' tem 0 linha(s) fora do dominio; esperado = base + 1
+    sujando a linha 0 da amostra, que esta' dentro do dominio
+  [ok ] idade = 17                                           esperado 1              obtido 1
+  [ok ] score_bureau = 1000                                  esperado 1              obtido 1
+  [ok ] num_parcelas = 18                                    esperado 1              obtido 1
+  [ok ] canal = WhatsApp                                     esperado 1              obtido 1
+  [ok ] possui_imovel = 2                                    esperado 1              obtido 1
+  [ok ] renda_mensal = 0.0                                   esperado 1              obtido 1
+  [ok ] divida_renda = -0.5                                  esperado 1              obtido 1
+  [ok ] inadimplente = 2                                     esperado 1              obtido 1
+
+=== 3. nulo indevido em coluna nao-nulavel ===
+  [ok ] score_bureau nulo                                    esperado 1              obtido 1
+
+=== 3b. id duplicado e' pego ===
+  [ok ] id_solicitacao repetido                              esperado True           obtido True
+
+=== 3c. os tres conjuntos nao se tocam, e mantem a prevalencia ===
+  [ok ] treino x teste sem interseccao                       esperado 0              obtido 0
+  [ok ] calibracao x teste sem interseccao                   esperado 0              obtido 0
+  [ok ] os tres somam o arquivo inteiro                      esperado 18000          obtido 18000
+  [ok ] prevalencia igual nos tres (diferenca < 0,1 ponto)   esperado True           obtido True
+
+=== 4. falha ESTRUTURAL levanta, nao devolve indice vazio ===
+    o caso perigoso: sem a guarda, a tabela errada passaria batido
+  [ok ] coluna renomeada levanta ValueError                  esperado ValueError     obtido ValueError
+       tabela fora do esquema, nao e' problema de linha:
+
+=== TODOS OS CASOS PASSARAM ===

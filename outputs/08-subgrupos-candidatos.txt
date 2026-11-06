@@ -1,0 +1,115 @@
+limiar operacional t = 0.0660 (razao 10:1)
+recall geral 0.674 | taxa de negacao geral 37.6% | 3,600 solicitacoes, 273 inadimplentes
+
+======================================================================================
+RECORTE: regiao
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   Centro-Oeste          275    24    0.833     [0.64 , 0.93]     38.2%     [0.33 , 0.44]   
+   Nordeste              904    79    0.684     [0.57 , 0.78]     36.1%     [0.33 , 0.39]   
+   Norte                 382    32    0.312     [0.18 , 0.49]     34.0%     [0.29 , 0.39]   PROTEGE MENOS
+   Sudeste             1,541   105    0.762     [0.67 , 0.83]     37.2%     [0.35 , 0.40]   
+   Sul                   498    33    0.606     [0.44 , 0.75]     43.6%     [0.39 , 0.48]   BARRA MAIS
+
+======================================================================================
+RECORTE: canal
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   Agência             1,104    88    0.773     [0.67 , 0.85]     41.6%     [0.39 , 0.45]   BARRA MAIS
+   App                 1,932   141    0.610     [0.53 , 0.69]     35.8%     [0.34 , 0.38]   
+   Correspondente        564    44    0.682     [0.53 , 0.80]     35.8%     [0.32 , 0.40]   
+
+======================================================================================
+RECORTE: faixa de idade
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   18-25                 492    37    0.595     [0.43 , 0.74]     47.4%     [0.43 , 0.52]   BARRA MAIS
+   26-35                 977    70    0.743     [0.63 , 0.83]     39.9%     [0.37 , 0.43]   
+   36-50               1,648   138    0.688     [0.61 , 0.76]     36.1%     [0.34 , 0.38]   
+   51+                   483    28    0.536     [0.36 , 0.70]     27.7%     [0.24 , 0.32]   
+
+======================================================================================
+RECORTE: faixa de renda
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   renda Q1              900    79    0.772     [0.67 , 0.85]     44.2%     [0.41 , 0.47]   BARRA MAIS
+   renda Q2              900    70    0.657     [0.54 , 0.76]     39.1%     [0.36 , 0.42]   
+   renda Q3              900    65    0.692     [0.57 , 0.79]     36.3%     [0.33 , 0.40]   
+   renda Q4              900    59    0.542     [0.42 , 0.66]     30.6%     [0.28 , 0.34]   PROTEGE MENOS
+
+======================================================================================
+RECORTE: faixa de valor
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   valor Q1              900    60    0.683     [0.56 , 0.79]     39.9%     [0.37 , 0.43]   
+   valor Q2              900    76    0.632     [0.52 , 0.73]     38.2%     [0.35 , 0.41]   
+   valor Q3              900    64    0.797     [0.68 , 0.88]     36.7%     [0.34 , 0.40]   
+   valor Q4              900    73    0.603     [0.49 , 0.71]     35.4%     [0.32 , 0.39]   
+
+======================================================================================
+RECORTE: faixa de score
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   score Q1              904   131    0.924     [0.87 , 0.96]     85.8%     [0.83 , 0.88]   BARRA MAIS
+   score Q2              899    67    0.657     [0.54 , 0.76]     45.1%     [0.42 , 0.48]   BARRA MAIS
+   score Q3              908    47    0.319     [0.20 , 0.46]     14.8%     [0.13 , 0.17]   PROTEGE MENOS
+   score Q4              889    28    0.143     [0.06 , 0.31]      4.2%     [0.03 , 0.06]   PROTEGE MENOS
+
+======================================================================================
+RECORTE: garantia
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   com imovel          1,095    78    0.654     [0.54 , 0.75]     27.4%     [0.25 , 0.30]   
+   sem imovel          2,505   195    0.682     [0.61 , 0.74]     42.0%     [0.40 , 0.44]   BARRA MAIS
+
+======================================================================================
+RECORTE: prazo
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   12x                   521    33    0.727     [0.56 , 0.85]     33.6%     [0.30 , 0.38]   
+   24x                   833    66    0.697     [0.58 , 0.79]     35.1%     [0.32 , 0.38]   
+   36x                 1,106    81    0.654     [0.55 , 0.75]     38.0%     [0.35 , 0.41]   
+   48x                   793    53    0.660     [0.53 , 0.77]     38.1%     [0.35 , 0.42]   
+   60x                   347    40    0.650     [0.50 , 0.78]     47.0%     [0.42 , 0.52]   BARRA MAIS
+
+======================================================================================
+RECORTE: atrasos em 12m
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   0 atraso(s)         2,559   163    0.564     [0.49 , 0.64]     29.2%     [0.28 , 0.31]   PROTEGE MENOS
+   1 atraso(s)           869    81    0.778     [0.68 , 0.85]     53.3%     [0.50 , 0.57]   BARRA MAIS
+   2 atraso(s)           154    23    1.000     [0.86 , 1.00]     79.9%     [0.73 , 0.85]   BARRA MAIS
+
+======================================================================================
+RECORTE: relacao com o banco
+======================================================================================
+   grupo                   n   pos   recall      IC do recall   negados     IC da negacao   alerta
+   2-5a                1,132    73    0.712     [0.60 , 0.80]     35.2%     [0.32 , 0.38]   
+   5a+                   516    39    0.590     [0.43 , 0.73]     37.0%     [0.33 , 0.41]   
+   6-24m               1,146   103    0.718     [0.62 , 0.80]     40.3%     [0.38 , 0.43]   
+   ate 6m                806    58    0.603     [0.47 , 0.72]     37.3%     [0.34 , 0.41]   
+
+======================================================================================
+O QUE SOBREVIVEU AO INTERVALO DE CONFIANCA
+======================================================================================
+       recorte       grupo    n  positivos recall negados        alerta
+        regiao       Norte  382         32  0.312   34.0% PROTEGE MENOS
+        regiao         Sul  498         33  0.606   43.6%    BARRA MAIS
+         canal     Agência 1104         88  0.773   41.6%    BARRA MAIS
+faixa de idade       18-25  492         37  0.595   47.4%    BARRA MAIS
+faixa de renda    renda Q1  900         79  0.772   44.2%    BARRA MAIS
+faixa de renda    renda Q4  900         59  0.542   30.6% PROTEGE MENOS
+faixa de score    score Q1  904        131  0.924   85.8%    BARRA MAIS
+faixa de score    score Q2  899         67  0.657   45.1%    BARRA MAIS
+faixa de score    score Q3  908         47  0.319   14.8% PROTEGE MENOS
+faixa de score    score Q4  889         28  0.143    4.2% PROTEGE MENOS
+      garantia  sem imovel 2505        195  0.682   42.0%    BARRA MAIS
+         prazo         60x  347         40  0.650   47.0%    BARRA MAIS
+atrasos em 12m 0 atraso(s) 2559        163  0.564   29.2% PROTEGE MENOS
+atrasos em 12m 1 atraso(s)  869         81  0.778   53.3%    BARRA MAIS
+atrasos em 12m 2 atraso(s)  154         23  1.000   79.9%    BARRA MAIS
+
+   Como levar isto para a secao 7: o recorte que entra no relatorio e' o que tem
+   diferenca sustentada E consequencia para alguem. Um grupo que e' barrado mais
+   porque tem risco maior de verdade nao e' o mesmo caso de um grupo que e'
+   barrado mais E protegido menos — o segundo recebe o pior dos dois mundos.

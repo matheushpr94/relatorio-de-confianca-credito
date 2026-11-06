@@ -1,0 +1,54 @@
+
+====================================================================================
+DIAGRAMA DE CONFIABILIDADE — o modelo sem calibrar, no teste
+====================================================================================
+   faixa de probabilidade            n   previsto   observado   diferenca  leitura
+   [0.002 , 0.016]              450      0.011       0.016      +0.004  ok
+   [0.016 , 0.026]              450      0.021       0.027      +0.005  ok
+   [0.026 , 0.037]              450      0.032       0.049      +0.017  sub-confiante
+   [0.037 , 0.049]              450      0.042       0.058      +0.015  sub-confiante
+   [0.049 , 0.066]              450      0.057       0.049      -0.008  ok
+   [0.066 , 0.095]              450      0.079       0.082      +0.004  ok
+   [0.095 , 0.144]              450      0.115       0.109      -0.006  ok
+   [0.144 , 0.770]              450      0.233       0.218      -0.016  super-confiante
+
+   Acima da diagonal (observado > previsto) = sub-confiante: o modelo promete
+   menos risco do que existe. Abaixo = super-confiante.
+
+====================================================================================
+AS TRES VERSOES, MEDIDAS NO TESTE
+====================================================================================
+   versao                ECE   ECE quantil     Brier      AUC  Brier/piso
+   sem calibrar       0.0089        0.0104   0.06476   0.7224       0.924
+   Platt              0.0135        0.0130   0.06482   0.7224       0.925
+   Isotonic           0.0102        0.0139   0.06477   0.7205       0.924
+
+   piso: ECE 0 (alcancado pelo modelo que devolve 7.58% para
+   todo mundo), Brier 0.0701, AUC 0,5.
+   ECE sozinho nao decide nada: o inutil tem ECE zero. Ele so' vale ao lado da AUC.
+
+====================================================================================
+A CALIBRACAO MUDOU A ORDENACAO?
+====================================================================================
+   sem calibrar    AUC 0.7224  (+0.0000)
+   Platt           AUC 0.7224  (+0.0000)
+   Isotonic        AUC 0.7205  (-0.0018)
+
+   Platt e' monotona, entao NAO pode mudar a ordem — a AUC tem que ficar igual.
+   Isotonic e' monotona por partes e empata faixas inteiras: ela pode mexer na
+   terceira casa, e o que muda e' empate, nao ordem.
+
+====================================================================================
+DEPOIS DE CALIBRAR, O LIMIAR AINDA VALE?
+====================================================================================
+   Nao: calibrar desloca a escala. O limiar tem que ser recalculado, senao a
+   operacao muda sem ninguem decidir. Com 1 FN = 10 FPs:
+
+   versao              limiar   recall  precisao   negados
+   sem calibrar        0.0660    0.674     0.136     1,352
+   Platt               0.0620    0.674     0.136     1,352
+   Isotonic            0.0630    0.674     0.136     1,354
+
+   Se as tres linhas entregam operacao parecida, a calibracao nao mudou a
+   DECISAO — mudou o numero apresentado a quem decide. Isso importa
+   quando a probabilidade entra em conta: preco, provisao, fila de analise.

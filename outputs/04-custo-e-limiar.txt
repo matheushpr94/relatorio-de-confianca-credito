@@ -1,0 +1,87 @@
+
+====================================================================================
+O LIMIAR 0,5 NAO FOI ESCOLHIDO POR NINGUEM
+====================================================================================
+   no teste, limiar 0,5:  VP 10  FN 263  FP 2  VN 3325
+   recall 0.037 | precisao 0.833
+   acuracia 0.9264 contra piso 0.9242 do modelo que nunca acusa ninguem
+
+   263 dos 273 inadimplentes passam. O default da biblioteca
+   entrega, aqui, quase o modelo que nunca acusa ninguem.
+
+====================================================================================
+CADA RAZAO DE CUSTO PRODUZ UM LIMIAR — escolha a linha, nao o numero
+====================================================================================
+Razao = quantos falsos positivos valem um falso negativo. Em credito:
+  FP = negar credito a quem pagaria (a pessoa perde o credito, o banco o juro)
+  FN = conceder a quem nao paga (o banco perde o principal, a pessoa a divida)
+
+Limiar escolhido na CALIBRACAO, resultado medido no TESTE:
+
+  FN:FP  t* formula  t* varrido   recall  precisao  negados  % negados  calotes retidos
+---------------------------------------------------------------------------------------
+     1x      0.5000      0.3720    0.081     0.512       43      1.2%        22 de 273
+     2x      0.3333      0.3020    0.117     0.416       77      2.1%        32 de 273
+     5x      0.1667      0.1930    0.256     0.285      246      6.8%        70 de 273
+    10x      0.0909      0.0660    0.674     0.136    1,352     37.6%       184 de 273
+    20x      0.0476      0.0560    0.714     0.122    1,596     44.3%       195 de 273
+    50x      0.0196      0.0250    0.941     0.093    2,761     76.7%       257 de 273
+   100x      0.0099      0.0150    0.982     0.083    3,220     89.4%       268 de 273
+   200x      0.0050      0.0150    0.982     0.083    3,220     89.4%       268 de 273
+
+   A formula fechada e o limiar varrido discordam porque a formula supoe
+   probabilidade perfeitamente calibrada e custo linear; na amostra finita, os
+   dois se afastam. Onde discordam, manda o varrido.
+
+====================================================================================
+O CUSTO DE ERRAR O LIMIAR E' ASSIMETRICO
+====================================================================================
+   cenario de referencia adotado: 1 FN = 10 FPs, t* = 0.0660
+
+       limiar    custo no teste   x o otimo
+       0.0165             2,949       1.43x
+       0.0330             2,515       1.22x
+       0.0660             2,058       1.00x  <- otimo
+       0.1320             2,065       1.00x
+       0.2640             2,441       1.19x
+       0.5000             2,632       1.28x  <- default
+
+   Operar no 0,5 custa 1.28x o otimo. A curva e' rasa perto do otimo
+   e sobe nas pontas: errar o limiar por um fator 2 custa pouco, errar por uma
+   ordem de grandeza custa caro. A figura docs/figuras/custo_limiar.png mostra.
+
+====================================================================================
+O PRECO DE ESCOLHER E RELATAR NO MESMO CONJUNTO
+====================================================================================
+Quanto o numero infla quando o limiar e' escolhido e medido na mesma amostra.
+Nao e' erro de conta: e' otimismo, e da' para medir.
+
+     razao   limiar   recall DENTRO   recall FORA   otimismo
+        1x    0.372          0.1095        0.0806    +0.0289
+        2x    0.302          0.1715        0.1172    +0.0543
+        5x    0.193          0.3212        0.2564    +0.0648
+       10x    0.066          0.7737        0.6740    +0.0997
+       20x    0.056          0.8248        0.7143    +0.1105
+       50x    0.025          0.9672        0.9414    +0.0258
+      100x    0.015          0.9964        0.9817    +0.0147
+      200x    0.015          0.9964        0.9817    +0.0147
+
+   O numero de dentro nao e' estimativa honesta do numero de fora: a diferenca
+   muda de tamanho conforme o cenario, e as duas colunas nunca devem ser
+   apresentadas como se fossem a mesma coisa.
+
+====================================================================================
+DE QUEM SERIA ESSA DECISAO, FORA DE UM EXERCICIO
+====================================================================================
+   Num banco: risco de credito, ou a area de negocio — nunca quem treinou o
+   modelo, porque quem treina tem interesse no resultado. A questao e' de
+   PAPEL, nao de burocracia.
+
+   Aqui nao ha' essa pessoa, entao a razao adotada e' 10:1, e
+   a conta fica declarada: no calote o banco perde o principal (60% a 90% dele, porque
+   parte se recupera); no cliente bom barrado perde a margem do contrato (5% a
+   15%). A razao entre as duas cai entre 4:1 e 18:1; 10:1 e' o meio da faixa.
+
+   O que isso muda na leitura do relatorio: a linha de referencia e' PREMISSA
+   declarada, e a tabela acima e' a resposta para 'e se a premissa estiver
+   errada?'. Premissa declarada com sensibilidade ao lado nao e' chute.
