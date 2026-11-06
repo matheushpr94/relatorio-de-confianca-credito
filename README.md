@@ -9,7 +9,7 @@ gerado por script, com uma recomendação no final.
 Workshop da Residência em IA, feito em dupla; este repositório é a minha reconstrução com
 dado sintético. Autor: Matheus Rosa.
 
-Relatório completo: [`outputs/09-relatorio-de-confianca.md`](outputs/09-relatorio-de-confianca.md) · versão HTML com figuras em [`docs/index.html`](docs/index.html) (GitHub Pages, pasta `/docs`)
+Relatório completo: [`outputs/09-relatorio-de-confianca.md`](outputs/09-relatorio-de-confianca.md) · [versão HTML com figuras](https://matheushpr94.github.io/relatorio-de-confianca-credito/)
 
 > **Todos os números deste README vêm de dado SINTÉTICO** (`src/gerar_dados.py`, semente
 > fixa, 18.000 solicitações, 7,6% de inadimplência). O efeito na região Norte foi
